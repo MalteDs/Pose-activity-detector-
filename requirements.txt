@@ -7,3 +7,4 @@ scikit-learn
 ipykernel
 jupyter
 seaborn
+PyQt5

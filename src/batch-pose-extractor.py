@@ -72,6 +72,7 @@ for i, class_name in enumerate(sorted(os.listdir(INPUT_DIR))):
 
 pose.close()
 
+os.makedirs('data/metadata', exist_ok=True)
 # Guardar el mapeo de clases
 with open('data/metadata/class_map.json', 'w') as f:
     json.dump(class_map, f, indent=4)

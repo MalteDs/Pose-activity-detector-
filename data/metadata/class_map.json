@@ -1,0 +1,7 @@
+{
+    "caminar_adelante": 0,
+    "caminar_atras": 1,
+    "levantarse": 2,
+    "sentarse": 3,
+    "vuelta": 4
+}

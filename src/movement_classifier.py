@@ -1,0 +1,1 @@
+model = load_model('mi_modelo_lstm.h5')

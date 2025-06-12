@@ -5,6 +5,27 @@ from PIL import Image, ImageTk
 import mediapipe as mp
 import numpy as np
 import math
+from tensorflow.keras.models import load_model
+import joblib
+import os           
+import pandas as pd                     
+
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(base_dir, "models", "movimiento_classifier.h5")
+
+if not os.path.exists(model_path):
+    print(f"❌ El modelo no se encuentra en la ruta: {model_path}")
+    exit()
+scaler_path = os.path.join(base_dir, "models", "scaler.pkl")
+if not os.path.exists(scaler_path):
+    print(f"❌ El scaler no se encuentra en la ruta: {scaler_path}")
+    exit()
+
+model = load_model(model_path)
+
+# model = load_model("./models/movimiento_classifier.h5")
+scaler = joblib.load(scaler_path)
 
 # Inicializar MediaPipe
 mp_drawing = mp.solutions.drawing_utils
@@ -73,6 +94,19 @@ class RealTimePoseApp:
         if results.pose_landmarks:
             lm = results.pose_landmarks.landmark
             features = extract_features(lm)
+
+            feature_names = ['angle_knee_left', 'angle_knee_right', 'angle_hip_left', 
+                 'angle_hip_right', 'trunk_inclination', 'shoulder_dist', 'hip_dist']
+            features_df = pd.DataFrame([features], columns=feature_names)
+            # features = features_df.iloc[0].values.tolist()
+            features_scaled = scaler.transform(features_df)
+
+            # features_scaled = scaler.transform([features])
+            prediction = model.predict(features_scaled)
+            predicted_label = np.argmax(prediction)
+
+
+
             features_text = (
                 f"angle_knee_left: {features[0]:.2f}\n"
                 f"angle_knee_right: {features[1]:.2f}\n"
@@ -80,7 +114,8 @@ class RealTimePoseApp:
                 f"angle_hip_right: {features[3]:.2f}\n"
                 f"trunk_inclination: {features[4]:.2f}\n"
                 f"shoulder_dist: {features[5]:.4f}\n"
-                f"hip_dist: {features[6]:.4f}"
+                f"hip_dist: {features[6]:.4f}\n"
+                f"🔍 Predicted Movement: {predicted_label}"
             )
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 

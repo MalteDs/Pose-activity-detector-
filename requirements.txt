@@ -8,3 +8,4 @@ ipykernel
 jupyter
 seaborn
 PyQt5
+tensorflow

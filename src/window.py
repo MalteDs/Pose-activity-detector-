@@ -61,6 +61,20 @@ def extract_features(lm):
 
     return [angle_knee_left, angle_knee_right, angle_hip_left, angle_hip_right, trunk_inclination, shoulder_dist, hip_dist]
 
+def get_predicted_class(n):
+    if n == 0:
+        return "CAMINAR HACIA ADELANTE"
+    elif n == 1:
+        return "CAMINAR HACIA ATRÁS"
+    elif n == 2:
+        return "LEVANTARSE"
+    elif n == 3:
+        return "SENTARSE"
+    elif n == 4:
+        return "VUELTA"
+    else:
+        return "DESCONOCIDO"
+
 class RealTimePoseApp:
     def __init__(self, window):
         self.window = window
@@ -91,6 +105,7 @@ class RealTimePoseApp:
         results = self.pose.process(image)
 
         features_text = "Sin detección"
+        predicted_class = "N/A"
         if results.pose_landmarks:
             lm = results.pose_landmarks.landmark
             features = extract_features(lm)
@@ -105,7 +120,8 @@ class RealTimePoseApp:
             prediction = model.predict(features_scaled)
             predicted_label = np.argmax(prediction)
 
-
+            
+            predicted_class = get_predicted_class(predicted_label)
 
             features_text = (
                 f"angle_knee_left: {features[0]:.2f}\n"
@@ -115,9 +131,18 @@ class RealTimePoseApp:
                 f"trunk_inclination: {features[4]:.2f}\n"
                 f"shoulder_dist: {features[5]:.4f}\n"
                 f"hip_dist: {features[6]:.4f}\n"
-                f"🔍 Predicted Movement: {predicted_label}"
+                f"🔍 Predicted Movement: {predicted_class}"
             )
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+            cv2.putText(frame,
+                            f"{predicted_class}",              # Solo el nombre de la clase
+                            (50, 400),                         # Coordenadas (x, y) — ajústalas si quieres
+                            cv2.FONT_HERSHEY_SIMPLEX,          # Fuente
+                            1.5,                               # Escala de fuente (más grande)
+                            (0, 0, 255),                       # Color (BGR) — rojo
+                            4,                                 # Grosor de línea
+                            cv2.LINE_AA)
 
         # Mostrar en GUI
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

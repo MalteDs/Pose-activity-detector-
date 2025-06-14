@@ -9,6 +9,8 @@ from tensorflow.keras.models import load_model
 import joblib
 import os
 import pandas as pd
+from collections import deque, Counter
+
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(base_dir, "models", "movimiento_classifier.h5")
@@ -62,6 +64,7 @@ class RealTimePoseApp:
         self.window = window
         self.window.title("Detección de Movimiento en Tiempo Real")
         self.window.configure(bg="black")
+        self.prediction_queue = deque(maxlen=10)
 
         self.video_label = Label(window, bg="black")
         self.video_label.pack()
@@ -98,7 +101,10 @@ class RealTimePoseApp:
             scaled_features = scaler.transform(features_df)
             prediction = model.predict(scaled_features,verbose=0)
             predicted_label = np.argmax(prediction)
-            predicted_class = get_predicted_class(predicted_label)
+            self.prediction_queue.append(predicted_label)
+            most_common = Counter(self.prediction_queue).most_common(1)[0][0]
+            predicted_class = get_predicted_class(most_common)
+            # predicted_class = get_predicted_class(predicted_label)
 
             mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 

@@ -11,7 +11,7 @@ import os
 import pandas as pd
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, "models", "movimiento_classifier.h5")
+model_path = os.path.join(base_dir, "models", "Neural-Network_classifier.h5")
 scaler_path = os.path.join(base_dir, "models", "scaler.pkl")
 
 if not os.path.exists(model_path):
